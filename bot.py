@@ -16,7 +16,7 @@ DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 # 🔗 Force subscription channel (must be PUBLIC)
-FORCE_CHANNEL = "@your_channel_username"  # Replace with your public channel username
+FORCE_CHANNEL = "https://t.me/+eMw2ExVt0P04ZGVl"  # Replace with your public channel username
 
 # 🌐 DeepSeek API configuration
 DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
