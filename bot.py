@@ -9,47 +9,48 @@ import requests
 from telegram import Update, ChatAction, ReplyKeyboardMarkup, KeyboardButton
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-# API Keys
+# API Keys (from Koyeb environment)
 BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
 
 # Emoji options
 emojis = ['🤖', '✨', '💡', '🤔', '😎', '🔥']
 
-# Language options
+# Supported languages
 LANGUAGES = {
-    "English": "Hello! You can now chat with me in English.",
-    "हिन्दी": "नमस्ते! अब आप मुझसे हिंदी में बात कर सकते हैं।",
-    "বাংলা": "হ্যালো! আপনি এখন বাংলায় আমার সঙ্গে কথা বলতে পারেন।"
+    "English": "✅ Language set to English. You can chat with me freely.",
+    "हिन्दी": "✅ भाषा हिंदी सेट कर दी गई है। अब आप मुझसे हिंदी में बात कर सकते हैं।",
+    "বাংলা": "✅ ভাষা বাংলা সেট করা হয়েছে। এখন আপনি বাংলায় কথা বলতে পারেন।"
 }
 
+# Store user language preferences
 user_languages = {}
 
-# Start command
+# /start command
 def start(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     user_languages[chat_id] = "English"
-    context.bot.send_message(chat_id=chat_id, text=f"👋 Hello! I'm a ChatGPT-style bot.\nMade by @raj_dev_01")
+    context.bot.send_message(chat_id=chat_id, text="👋 Hello! I'm your AI bot powered by DeepSeek.\nMade by @raj_dev_01")
 
-# Help command
+# /help command
 def help_command(update: Update, context: CallbackContext):
-    update.message.reply_text("🛠 Send me any message, and I’ll reply using DeepSeek API.\nUse /language to change language.")
+    update.message.reply_text("🛠 Just send me any message, and I will reply using DeepSeek AI.\nUse /language to change language.")
 
-# About command
+# /about command
 def about_command(update: Update, context: CallbackContext):
-    update.message.reply_text("🤖 I'm an AI-powered bot powered by DeepSeek.\nCreated by @raj_dev_01.")
+    update.message.reply_text("🤖 I am an AI chatbot using DeepSeek API.\nBuilt and maintained by @raj_dev_01.")
 
-# Creator command
+# /creator command
 def creator_command(update: Update, context: CallbackContext):
     update.message.reply_text("👨‍💻 Bot Creator: Rajdev (@raj_dev_01)")
 
-# Language change command
+# /language command
 def language_command(update: Update, context: CallbackContext):
     keyboard = [[KeyboardButton(lang)] for lang in LANGUAGES]
     reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
     update.message.reply_text("🌐 Choose your language:", reply_markup=reply_markup)
 
-# Handle language selection
+# Handle language change
 def handle_language(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     lang = update.message.text
@@ -59,11 +60,10 @@ def handle_language(update: Update, context: CallbackContext):
         return
     handle_message(update, context)
 
-# Main message handler
+# Main reply logic using DeepSeek
 def handle_message(update: Update, context: CallbackContext):
     chat_id = update.effective_chat.id
     user_msg = update.message.text
-
     emoji = random.choice(emojis)
     context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
     update.message.reply_text(emoji)
@@ -85,18 +85,22 @@ def handle_message(update: Update, context: CallbackContext):
     except Exception as e:
         reply_text = "⚠️ Sorry, I couldn't get a reply. Please try again later."
 
-    context.bot.send_message(chat_id=chat_id, text=f"{reply_text}\n\n🔖 _Powered by @raj_dev_01_", parse_mode="Markdown")
+    context.bot.send_message(
+        chat_id=chat_id,
+        text=f"{reply_text}\n\n🔖 [Powered by @raj_dev_01](https://t.me/raj_dev_01)",
+        parse_mode="Markdown"
+    )
 
-# Welcome new users (optional)
+# Greet new users (optional)
 def welcome(update: Update, context: CallbackContext):
     for member in update.message.new_chat_members:
         context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text=f"👋 Welcome {member.first_name}! Ask me anything.",
+            text=f"👋 Welcome {member.first_name}! I'm an AI bot. Ask me anything!",
             parse_mode="Markdown"
         )
 
-# Start polling
+# Main function
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
     dp = updater.dispatcher
@@ -106,6 +110,7 @@ def main():
     dp.add_handler(CommandHandler("about", about_command))
     dp.add_handler(CommandHandler("creator", creator_command))
     dp.add_handler(CommandHandler("language", language_command))
+
     dp.add_handler(MessageHandler(Filters.status_update.new_chat_members, welcome))
     dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_language))
 
@@ -114,4 +119,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
